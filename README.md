@@ -1,5 +1,9 @@
 ![build-test](https://github.com/lcollins/checkstyle-github-action/workflows/build-test/badge.svg)
 
+# Credit
+
+Adapted from https://github.com/jwgmeligmeyling/checkstyle-github-action to support Node 20.
+
 # Checkstyle GitHub Action
 
 This action pushes results from [Checkstyle](https://checkstyle.github.io/) as check run annotations. :rocket:
@@ -87,11 +91,6 @@ This is a Github Action in a series of other GitHub Actions. Similar actions inc
 * [checkstyle-github-action](https://github.com/lcollins/checkstyle-github-action)
 * [pmd-github-action](https://github.com/lcollins/pmd-github-action)
 * [spotbugs-github-action](https://github.com/lcollins/spotbugs-github-action)
-
-## Known limitations
-Due to GitHub API limitations, we cannot specify to which Workflow Run (or underlying Check Suite) a newly created Check Run should be associated.
-As a result, workflows that trigger on several types of events, might push results under another event than the action was run in.
-For more information, see: https://github.com/lcollins/checkstyle-github-action/issues/2
 
 ## Contributing
 

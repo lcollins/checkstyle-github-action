@@ -23,7 +23,7 @@
     "node",
     "setup"
   ],
-  "author": "Jan-Willem Gmelig Meyling",
+  "author": "Luke Collins",
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.10.1",
