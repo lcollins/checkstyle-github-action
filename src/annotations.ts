@@ -32,10 +32,9 @@ function getWarningLevel(arg: Severity): AnnotationLevel {
 export function annotationsForPath(resultFile: string): Annotation[] {
   core.info(`Creating annotations for ${resultFile}`)
   const root: string = process.env['GITHUB_WORKSPACE'] || ''
-  const parser = new XMLParser()
+  const parser = new XMLParser(XML_PARSE_OPTIONS)
   const result: CheckstyleReport = parser.parse(
-    fs.readFileSync(resultFile, 'UTF-8' as BufferEncoding),
-    XML_PARSE_OPTIONS
+    fs.readFileSync(resultFile, 'UTF-8' as BufferEncoding)
   )
 
   return chain(

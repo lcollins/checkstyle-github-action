@@ -64,8 +64,8 @@ function annotationsForPath(resultFile) {
     var _a;
     core.info(`Creating annotations for ${resultFile}`);
     const root = process.env['GITHUB_WORKSPACE'] || '';
-    const parser = new fast_xml_parser_1.XMLParser();
-    const result = parser.parse(fs_1.default.readFileSync(resultFile, 'UTF-8'), XML_PARSE_OPTIONS);
+    const parser = new fast_xml_parser_1.XMLParser(XML_PARSE_OPTIONS);
+    const result = parser.parse(fs_1.default.readFileSync(resultFile, 'UTF-8'));
     return (0, ramda_1.chain)(file => {
         return (0, ramda_1.map)(violation => {
             const annotation = {
