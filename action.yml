@@ -1,5 +1,5 @@
-name: 'Publish Checkstyle report'
-description: 'Publish Checkstyle code adherence report (adapted from jwgmeligmeyling/checkstyle-github-action)'
+name: 'Publish Checkstyle Code Report'
+description: 'Publish Checkstyle code report (adapted from jwgmeligmeyling/checkstyle-github-action)'
 author: 'Luke Collins'
 inputs:
   path:
