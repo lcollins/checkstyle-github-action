@@ -1,24 +1,42 @@
 name: "build-test"
 on: # rebuild any PRs and main branch changes
-  pull_request:
   push:
     branches:
+      - main
       - master
-      - 'releases/*'
+      - release/*
+      - releases/*
+  pull_request:
+    branches:
+      - main
+      - master
+      - release/*
+      - releases/*
+
+permissions:
+  security-events: write
+  actions: write
+  checks: write
+  deployments: write
+  id-token: write
+  discussions: write
+  pull-requests: write
+  statuses: write
 
 jobs:
   build: # make sure build/ci work properly
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - run: |
-        npm install
-    - run: |
-        npm run all
+      - uses: actions/checkout@v4
+      - run: |
+          npm install
+      - run: |
+          npm run all
   test: # make sure the action works on a clean machine without building
+    needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: ./
-      with: 
-        path: '**/checkstyle-result.xml'
+      - uses: actions/checkout@v4
+      - uses: ./
+        with:
+          path: '**/checkstyle-result.xml'
