@@ -41,7 +41,7 @@
   "devDependencies": {
     "@types/istanbul-lib-report": "^3.0.3",
     "@types/jest": "^29.5.8",
-    "@types/node": "^20.9.0",
+    "@types/node": "^20.9.1",
     "@types/ramda": "^0.29.9",
     "@typescript-eslint/parser": "^6.11.0",
     "@vercel/ncc": "^0.38.1",
