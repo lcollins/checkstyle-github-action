@@ -42,7 +42,7 @@
     "@types/istanbul-lib-report": "^3.0.3",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.11.16",
-    "@types/ramda": "^0.29.9",
+    "@types/ramda": "^0.29.10",
     "@typescript-eslint/parser": "^6.20.0",
     "@vercel/ncc": "^0.38.1",
     "eslint": "^8.56.0",
