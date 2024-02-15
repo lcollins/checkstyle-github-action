@@ -37,21 +37,18 @@ export function annotationsForPath(resultFile: string): Annotation[] {
     fs.readFileSync(resultFile, 'UTF-8' as BufferEncoding)
   )
 
-  return chain(
-    file => {
-      return map(violation => {
-        const annotation: Annotation = {
-          annotation_level: getWarningLevel(violation.severity),
-          path: path.relative(root, file.name),
-          start_line: Number(violation.line || 1),
-          end_line: Number(violation.line || 1),
-          title: violation.source,
-          message: decode(violation.message)
-        }
+  return chain(file => {
+    return map(violation => {
+      const annotation: Annotation = {
+        annotation_level: getWarningLevel(violation.severity),
+        path: path.relative(root, file.name),
+        start_line: Number(violation.line || 1),
+        end_line: Number(violation.line || 1),
+        title: violation.source,
+        message: decode(violation.message)
+      }
 
-        return annotation
-      }, asArray(file.error))
-    },
-    asArray<File>(result.checkstyle?.file)
-  )
+      return annotation
+    }, asArray(file.error))
+  }, asArray<File>(result.checkstyle?.file))
 }
