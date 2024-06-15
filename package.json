@@ -35,7 +35,7 @@
     "@types/html-to-text": "^9.0.4",
     "fast-xml-parser": "^4.3.6",
     "html-to-text": "latest",
-    "ramda": "^0.30.0",
+    "ramda": "^0.30.1",
     "unescape": "latest"
   },
   "devDependencies": {
