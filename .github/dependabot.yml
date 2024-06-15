@@ -12,7 +12,10 @@ updates:
     - "lcollins"
     assignees:
     - "lcollins"
-
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
@@ -22,3 +25,7 @@ updates:
     - "lcollins"
     assignees:
     - "lcollins"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
