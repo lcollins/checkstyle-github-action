@@ -52,7 +52,7 @@ jobs:
           ${{ runner.os }}-maven-
     - name: Build with Maven
       run: mvn -B verify checkstyle:checkstyle
-    - uses: lcollins/checkstyle-github-action@v3.0.0
+    - uses: lcollins/checkstyle-github-action@v3.1.0
       with:
         path: '**/checkstyle-result.xml'
 ```

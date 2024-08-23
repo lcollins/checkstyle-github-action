@@ -8029,6 +8029,8 @@ exports.validate = function (xmlData, options) {
             return getErrorObject('InvalidTag', "Closing tag '"+tagName+"' doesn't have proper closing.", getLineNumberForPosition(xmlData, i));
           } else if (attrStr.trim().length > 0) {
             return getErrorObject('InvalidTag', "Closing tag '"+tagName+"' can't have attributes or invalid starting.", getLineNumberForPosition(xmlData, tagStartPos));
+          } else if (tags.length === 0) {
+            return getErrorObject('InvalidTag', "Closing tag '"+tagName+"' has not been opened.", getLineNumberForPosition(xmlData, tagStartPos));
           } else {
             const otg = tags.pop();
             if (tagName !== otg.tagName) {
@@ -8472,6 +8474,7 @@ Builder.prototype.j2x = function(jObj, level) {
       //repeated nodes
       const arrLen = jObj[key].length;
       let listTagVal = "";
+      let listTagAttr = "";
       for (let j = 0; j < arrLen; j++) {
         const item = jObj[key][j];
         if (typeof item === 'undefined') {
@@ -8481,17 +8484,27 @@ Builder.prototype.j2x = function(jObj, level) {
           else val += this.indentate(level) + '<' + key + '/' + this.tagEndChar;
           // val += this.indentate(level) + '<' + key + '/' + this.tagEndChar;
         } else if (typeof item === 'object') {
-          if(this.options.oneListGroup ){
-            listTagVal += this.j2x(item, level + 1).val;
+          if(this.options.oneListGroup){
+            const result = this.j2x(item, level + 1);
+            listTagVal += result.val;
+            if (this.options.attributesGroupName && item.hasOwnProperty(this.options.attributesGroupName)) {
+              listTagAttr += result.attrStr
+            }
           }else{
             listTagVal += this.processTextOrObjNode(item, key, level)
           }
         } else {
-          listTagVal += this.buildTextValNode(item, key, '', level);
+          if (this.options.oneListGroup) {
+            let textValue = this.options.tagValueProcessor(key, item);
+            textValue = this.replaceEntitiesValue(textValue);
+            listTagVal += textValue;
+          } else {
+            listTagVal += this.buildTextValNode(item, key, '', level);
+          }
         }
       }
       if(this.options.oneListGroup){
-        listTagVal = this.buildObjectNode(listTagVal, key, '', level);
+        listTagVal = this.buildObjectNode(listTagVal, key, listTagAttr, level);
       }
       val += listTagVal;
     } else {
@@ -9301,10 +9314,18 @@ const parseXml = function(xmlData) {
           let tagContent = "";
           //self-closing tag
           if(tagExp.length > 0 && tagExp.lastIndexOf("/") === tagExp.length - 1){
+            if(tagName[tagName.length - 1] === "/"){ //remove trailing '/'
+              tagName = tagName.substr(0, tagName.length - 1);
+              jPath = jPath.substr(0, jPath.length - 1);
+              tagExp = tagName;
+            }else{
+              tagExp = tagExp.substr(0, tagExp.length - 1);
+            }
             i = result.closeIndex;
           }
           //unpaired tag
           else if(this.options.unpairedTags.indexOf(tagName) !== -1){
+            
             i = result.closeIndex;
           }
           //normal tag
@@ -10877,9 +10898,8 @@ module.exports = T;
 /***/ }),
 
 /***/ 15928:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+/***/ ((module) => {
 
-var _placeholder = /*#__PURE__*/__nccwpck_require__(77714);
 /**
  * A special placeholder value used to specify "gaps" within curried functions,
  * allowing partial application of any combination of arguments, regardless of
@@ -10907,7 +10927,9 @@ var _placeholder = /*#__PURE__*/__nccwpck_require__(77714);
  *      const greet = R.replace('{name}', R.__, 'Hello, {name}!');
  *      greet('Alice'); //=> 'Hello, Alice!'
  */
-module.exports = _placeholder;
+module.exports = {
+  '@@functional/placeholder': true
+};
 
 /***/ }),
 
@@ -11620,7 +11642,7 @@ var _curry3 = /*#__PURE__*/__nccwpck_require__(37597);
  * @param {*} a The first item to be compared.
  * @param {*} b The second item to be compared.
  * @return {Number} `-1` if fn(a) < fn(b), `1` if fn(b) < fn(a), otherwise `0`
- * @see R.descend
+ * @see R.descend, R.ascendNatural, R.descendNatural
  * @example
  *
  *      const byAge = R.ascend(R.prop('age'));
@@ -11638,6 +11660,49 @@ var ascend = /*#__PURE__*/_curry3(function ascend(fn, a, b) {
   return aa < bb ? -1 : aa > bb ? 1 : 0;
 });
 module.exports = ascend;
+
+/***/ }),
+
+/***/ 22857:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+var curry = /*#__PURE__*/__nccwpck_require__(40838);
+/**
+ * Makes an ascending comparator function out of a function that returns a value
+ * that can be compared with natural sorting using localeCompare.
+ *
+ * @func
+ * @memberOf R
+ * @since v0.30.1
+ * @category Function
+ * @sig Ord b => s -> (a -> b) -> a -> a -> Number
+ * @param {String|Array} locales A string with a BCP 47 language tag, or an array of such strings. Corresponds to the locales parameter of the Intl.Collator() constructor.
+ * @param {Function} fn A function of arity one that returns a value that can be compared
+ * @param {*} a The first item to be compared.
+ * @param {*} b The second item to be compared.
+ * @return {Number} `-1` if a occurs before b, `1` if a occurs after b, otherwise `0`
+ * @see R.ascend
+ * @example
+ *
+ *      const unsorted = ['3', '1', '10', 'Ørjan', 'Bob', 'Älva'];
+ *
+ *      R.sort(R.ascendNatural('en', R.identity), unsorted);
+ *      // => ['1', '3', '10', 'Älva', 'Bob', 'Ørjan']
+ *
+ *      R.sort(R.ascendNatural('sv', R.identity), unsorted);
+ *      // => ['1', '3', '10', 'Bob', 'Älva', 'Ørjan']
+ *
+ *     R.sort(R.ascend(R.identity), unsorted);
+ *      // => ['1', '10', '3', 'Bob', 'Älva', 'Ørjan']
+ */
+var ascendNatural = /*#__PURE__*/curry(function ascendNatural(locales, fn, a, b) {
+  const aa = fn(a);
+  const bb = fn(b);
+  return aa.localeCompare(bb, locales, {
+    numeric: true
+  });
+});
+module.exports = ascendNatural;
 
 /***/ }),
 
@@ -12762,7 +12827,7 @@ var _curry3 = /*#__PURE__*/__nccwpck_require__(37597);
  * @param {*} a The first item to be compared.
  * @param {*} b The second item to be compared.
  * @return {Number} `-1` if fn(a) > fn(b), `1` if fn(b) > fn(a), otherwise `0`
- * @see R.ascend
+ * @see R.ascend, R.descendNatural, R.ascendNatural
  * @example
  *
  *      const byAge = R.descend(R.prop('age'));
@@ -12780,6 +12845,49 @@ var descend = /*#__PURE__*/_curry3(function descend(fn, a, b) {
   return aa > bb ? -1 : aa < bb ? 1 : 0;
 });
 module.exports = descend;
+
+/***/ }),
+
+/***/ 52051:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+var curry = /*#__PURE__*/__nccwpck_require__(40838);
+/**
+ * Makes a descending comparator function out of a function that returns a value
+ * that can be compared with natural sorting using localeCompare.
+ *
+ * @func
+ * @memberOf R
+ * @since v0.30.1
+ * @category Function
+ * @sig Ord b => s -> (a -> b) -> a -> a -> Number
+ * @param {String|Array} locales A string with a BCP 47 language tag, or an array of such strings. Corresponds to the locales parameter of the Intl.Collator() constructor.
+ * @param {Function} fn A function of arity one that returns a value that can be compared
+ * @param {*} a The first item to be compared.
+ * @param {*} b The second item to be compared.
+ * @return {Number} `-1` if a occurs after b, `1` if a occurs before b, otherwise `0`
+ * @see R.descend
+ * @example
+ *
+ *      const unsorted = ['3', '1', '10', 'Ørjan', 'Bob', 'Älva'];
+ *
+ *      R.sort(R.descendNatural('en', R.identity), unsorted);
+ *      // => ['Ørjan', 'Bob', 'Älva', '10', '3', '1']
+ *
+ *      R.sort(R.descendNatural('sv', R.identity), unsorted);
+ *      // => ['Ørjan', 'Älva', 'Bob', '10', '3', '1']
+ *
+ *     R.sort(R.descend(R.identity), unsorted);
+ *      // => ['Ørjan', 'Älva', 'Bob', '3', '10', '1']
+ */
+var descendNatural = /*#__PURE__*/curry(function descendNatural(locales, fn, a, b) {
+  const aa = fn(a);
+  const bb = fn(b);
+  return bb.localeCompare(aa, locales, {
+    numeric: true
+  });
+});
+module.exports = descendNatural;
 
 /***/ }),
 
@@ -13874,11 +13982,11 @@ var _reduce = /*#__PURE__*/__nccwpck_require__(92872);
  * @return {*} z The result of applying the seed value to the function pipeline
  * @see R.pipe
  * @example
- *      R.flow(9, [Math.sqrt, R.negate, R.inc]), //=> -2
+ *      R.flow(9, [Math.sqrt, R.negate, R.inc]); //=> -2
  *
- *      const defaultName = 'Jane Doe';
- *      const savedName = R.flow(localStorage.get('name'), [R.when(R.isNil(defaultName)), R.match(/(.+)\s/), R.nth(0)]);
- *      const givenName = R.flow($givenNameInput.value, [R.trim, R.when(R.isEmpty, R.always(savedName))])
+ *      const personObj = { first: 'Jane', last: 'Doe' };
+ *      const fullName = R.flow(personObj, [R.values, R.join(' ')]); //=> "Jane Doe"
+ *      const givenName = R.flow('    ', [R.trim, R.when(R.isEmpty, R.always(fullName))]); //=> "Jane Doe"
  */
 var flow = /*#__PURE__*/_curry2(function flow(seed, pipeline) {
   return _reduce(applyTo, seed, pipeline);
@@ -14323,7 +14431,7 @@ var _nth = /*#__PURE__*/__nccwpck_require__(88303);
  * @since v0.1.0
  * @category List
  * @sig [a] -> a | Undefined
- * @sig String -> String
+ * @sig String -> String | Undefined
  * @param {Array|String} list
  * @return {*}
  * @see R.tail, R.init, R.last
@@ -14333,7 +14441,7 @@ var _nth = /*#__PURE__*/__nccwpck_require__(88303);
  *      R.head([]); //=> undefined
  *
  *      R.head('abc'); //=> 'a'
- *      R.head(''); //=> ''
+ *      R.head(''); //=> undefined
  */
 var head = /*#__PURE__*/_curry1(function (list) {
   return _nth(0, list);
@@ -14552,6 +14660,7 @@ module.exports.apply = __nccwpck_require__(95062);
 module.exports.applySpec = __nccwpck_require__(3231);
 module.exports.applyTo = __nccwpck_require__(23395);
 module.exports.ascend = __nccwpck_require__(78358);
+module.exports.ascendNatural = __nccwpck_require__(22857);
 module.exports.assoc = __nccwpck_require__(93295);
 module.exports.assocPath = __nccwpck_require__(89947);
 module.exports.binary = __nccwpck_require__(56688);
@@ -14578,6 +14687,7 @@ module.exports.curryN = __nccwpck_require__(61071);
 module.exports.dec = __nccwpck_require__(76536);
 module.exports.defaultTo = __nccwpck_require__(78445);
 module.exports.descend = __nccwpck_require__(53144);
+module.exports.descendNatural = __nccwpck_require__(52051);
 module.exports.difference = __nccwpck_require__(27013);
 module.exports.differenceWith = __nccwpck_require__(29323);
 module.exports.dissoc = __nccwpck_require__(5699);
@@ -16322,11 +16432,10 @@ module.exports = _isObject;
 /***/ }),
 
 /***/ 71934:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+/***/ ((module) => {
 
-var _placeholder = /*#__PURE__*/__nccwpck_require__(77714);
 function _isPlaceholder(a) {
-  return a === _placeholder;
+  return a != null && typeof a === 'object' && a['@@functional/placeholder'] === true;
 }
 module.exports = _isPlaceholder;
 
@@ -16567,15 +16676,6 @@ function _pipe(f, g) {
   };
 }
 module.exports = _pipe;
-
-/***/ }),
-
-/***/ 77714:
-/***/ ((module) => {
-
-module.exports = {
-  '@@functional/placeholder': true
-};
 
 /***/ }),
 
@@ -18222,7 +18322,7 @@ var _nth = /*#__PURE__*/__nccwpck_require__(88303);
  * @since v0.1.4
  * @category List
  * @sig [a] -> a | Undefined
- * @sig String -> String
+ * @sig String -> String | Undefined
  * @param {*} list
  * @return {*}
  * @see R.init, R.head, R.tail
@@ -18232,7 +18332,7 @@ var _nth = /*#__PURE__*/__nccwpck_require__(88303);
  *      R.last([]); //=> undefined
  *
  *      R.last('abc'); //=> 'c'
- *      R.last(''); //=> ''
+ *      R.last(''); //=> undefined
  */
 var last = /*#__PURE__*/_curry1(function (list) {
   return _nth(-1, list);
@@ -19924,7 +20024,7 @@ var _nth = /*#__PURE__*/__nccwpck_require__(88303);
  * @since v0.1.0
  * @category List
  * @sig Number -> [a] -> a | Undefined
- * @sig Number -> String -> String
+ * @sig Number -> String -> String | Undefined
  * @param {Number} offset
  * @param {*} list
  * @return {*}
@@ -19936,7 +20036,7 @@ var _nth = /*#__PURE__*/__nccwpck_require__(88303);
  *      R.nth(-99, list); //=> undefined
  *
  *      R.nth(2, 'abc'); //=> 'c'
- *      R.nth(3, 'abc'); //=> ''
+ *      R.nth(3, 'abc'); //=> undefined
  * @symb R.nth(-1, [a, b, c]) = c
  * @symb R.nth(0, [a, b, c]) = a
  * @symb R.nth(1, [a, b, c]) = b
