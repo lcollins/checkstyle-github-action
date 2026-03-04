@@ -38,5 +38,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./
+        id: checkstyle
         with:
           path: '**/checkstyle-result.xml'
+      - run: echo "conclusion=${{ steps.checkstyle.outputs.conclusion }}"
+      - run: echo "violations=${{ steps.checkstyle.outputs.violations }}"
+      - run: echo "failures=${{ steps.checkstyle.outputs.failures }}"
+      - run: echo "warnings=${{ steps.checkstyle.outputs.warnings }}"
+      - run: echo "notices=${{ steps.checkstyle.outputs.notices }}"
+      - run: echo "check_href=${{ steps.checkstyle.outputs.check_href }}"
