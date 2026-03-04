@@ -3,6 +3,7 @@ export enum Inputs {
   Title = 'title',
   Path = 'path',
   Token = 'token',
+  AnnotationGeneration = 'annotation_generation',
   CheckRun = 'check_run'
 }
 

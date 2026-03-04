@@ -2,6 +2,7 @@ import * as process from 'process'
 import fs from 'fs'
 import * as path from 'path'
 import {annotationsForPath} from '../src/annotations'
+import {Inputs} from '../src/constants'
 
 beforeAll(() => {
   jest.spyOn(fs, 'existsSync').mockReturnValue(true)
@@ -17,4 +18,8 @@ test('parses file', async () => {
   )
   const annotations = annotationsForPath(report)
   expect(annotations).toHaveLength(1928)
+})
+
+test('Inputs enum includes AnnotationGeneration', () => {
+  expect(Inputs.AnnotationGeneration).toBe('annotation_generation')
 })

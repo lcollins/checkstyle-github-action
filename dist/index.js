@@ -116,6 +116,7 @@ var Inputs;
     Inputs["Title"] = "title";
     Inputs["Path"] = "path";
     Inputs["Token"] = "token";
+    Inputs["AnnotationGeneration"] = "annotation_generation";
     Inputs["CheckRun"] = "check_run";
 })(Inputs || (exports.Inputs = Inputs = {}));
 var Outputs;
@@ -201,6 +202,8 @@ function run() {
             const path = core.getInput(constants_1.Inputs.Path, { required: true });
             const name = core.getInput(constants_1.Inputs.Name);
             const title = core.getInput(constants_1.Inputs.Title);
+            const annotationGenerationInput = core.getInput(constants_1.Inputs.AnnotationGeneration);
+            const annotationGeneration = annotationGenerationInput !== 'false';
             const checkRun = core.getInput(constants_1.Inputs.CheckRun).toLowerCase() !== 'false';
             const searchResult = yield (0, search_1.findResults)(path);
             if (searchResult.filesToUpload.length === 0) {
@@ -217,16 +220,24 @@ function run() {
                 core.debug(`Created ${groupedAnnotations.length} buckets`);
                 const conclusion = getConclusion(annotations);
                 const annotationsByLevel = (0, ramda_1.groupBy)(a => a.annotation_level, annotations);
-                const numFailures = (annotationsByLevel[github_1.AnnotationLevel.failure] || []).length;
-                const numWarnings = (annotationsByLevel[github_1.AnnotationLevel.warning] || []).length;
-                const numNotices = (annotationsByLevel[github_1.AnnotationLevel.notice] || []).length;
+                const numFailures = (annotationsByLevel[github_1.AnnotationLevel.failure] || [])
+                    .length;
+                const numWarnings = (annotationsByLevel[github_1.AnnotationLevel.warning] || [])
+                    .length;
+                const numNotices = (annotationsByLevel[github_1.AnnotationLevel.notice] || [])
+                    .length;
                 let checkHref = '';
                 if (checkRun) {
-                    for (const annotationSet of groupedAnnotations) {
-                        const href = yield createCheck(name, title, annotationSet, annotations.length, conclusion);
-                        if (!checkHref && href) {
-                            checkHref = href;
+                    if (annotationGeneration) {
+                        for (const annotationSet of groupedAnnotations) {
+                            const href = yield createCheck(name, title, annotationSet, annotations.length, conclusion);
+                            if (!checkHref && href) {
+                                checkHref = href;
+                            }
                         }
+                    }
+                    else {
+                        checkHref = yield createCheck(name, title, [], annotations.length, conclusion);
                     }
                 }
                 else {

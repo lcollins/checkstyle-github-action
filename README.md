@@ -28,6 +28,9 @@ Optional. Title for the check run to create. Defaults to `Checkstyle Source Code
 ### `token`
 Optional. GitHub API access token. Defaults to `${{ github.token }}`, which is set by `actions/checkout@v4` minimally.
 
+### `annotation_generation`
+Optional. When set to `false`, individual per-line annotations are not generated. The check run summary with the total violation count is still created. Defaults to `true`.
+
 ## Example usage
 
 ```yaml
