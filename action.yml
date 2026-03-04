@@ -23,6 +23,19 @@ inputs:
   check_run:
     description: 'Whether to create a GitHub Check Run with the results. Set to false to disable check run creation.'
     default: 'true'
+outputs:
+  conclusion:
+    description: "The conclusion of the check run: 'success', 'failure', or 'neutral'"
+  violations:
+    description: 'Total number of violations found'
+  failures:
+    description: 'Number of failure-level violations found'
+  warnings:
+    description: 'Number of warning-level violations found'
+  notices:
+    description: 'Number of notice-level violations found'
+  check_href:
+    description: 'URL to the generated check run'
 runs:
   using: 'node20'
   main: 'dist/index.js'

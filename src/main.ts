@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import {findResults} from './search'
-import {Inputs} from './constants'
+import {Inputs, Outputs} from './constants'
 import {annotationsForPath} from './annotations'
 import {chain, groupBy, splitEvery} from 'ramda'
 import {Annotation, AnnotationLevel} from './github'
@@ -43,19 +43,44 @@ async function run(): Promise<void> {
 
       const conclusion = getConclusion(annotations)
 
+      const annotationsByLevel: {[p: string]: Annotation[]} = groupBy(
+        a => a.annotation_level,
+        annotations
+      )
+      const numFailures = (
+        annotationsByLevel[AnnotationLevel.failure] || []
+      ).length
+      const numWarnings = (
+        annotationsByLevel[AnnotationLevel.warning] || []
+      ).length
+      const numNotices = (
+        annotationsByLevel[AnnotationLevel.notice] || []
+      ).length
+
+      let checkHref = ''
       if (checkRun) {
         for (const annotationSet of groupedAnnotations) {
-          await createCheck(
+          const href = await createCheck(
             name,
             title,
             annotationSet,
             annotations.length,
             conclusion
           )
+          if (!checkHref && href) {
+            checkHref = href
+          }
         }
       } else {
         core.info('Check run creation is disabled via check_run input')
       }
+
+      core.setOutput(Outputs.Conclusion, conclusion)
+      core.setOutput(Outputs.Violations, annotations.length)
+      core.setOutput(Outputs.Failures, numFailures)
+      core.setOutput(Outputs.Warnings, numWarnings)
+      core.setOutput(Outputs.Notices, numNotices)
+      core.setOutput(Outputs.CheckHref, checkHref)
     }
   } catch (error) {
     core.setFailed(error instanceof Error ? error : String(error))
@@ -95,7 +120,7 @@ async function createCheck(
   annotations: Annotation[],
   numErrors: number,
   conclusion: 'success' | 'failure' | 'neutral'
-): Promise<void> {
+): Promise<string> {
   core.info(
     `Uploading ${annotations.length} / ${numErrors} annotations to GitHub as ${name} with conclusion ${conclusion}`
   )
@@ -130,7 +155,8 @@ async function createCheck(
       }
     }
 
-    await octokit.rest.checks.create(createRequest)
+    const createRes = await octokit.rest.checks.create(createRequest)
+    return createRes.data.html_url || ''
   } else {
     const check_run_id = existingCheckRun.id
 
@@ -146,7 +172,8 @@ async function createCheck(
       }
     }
 
-    await octokit.rest.checks.update(update_req)
+    const updateRes = await octokit.rest.checks.update(update_req)
+    return updateRes.data.html_url || ''
   }
 }
 
