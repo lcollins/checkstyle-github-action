@@ -8,11 +8,12 @@ import {context, getOctokit} from '@actions/github'
 
 const MAX_ANNOTATIONS_PER_REQUEST = 50
 
-async function run(): Promise<void> {
+export async function run(): Promise<void> {
   try {
     const path = core.getInput(Inputs.Path, {required: true})
     const name = core.getInput(Inputs.Name)
     const title = core.getInput(Inputs.Title)
+    const checkRun = core.getInput(Inputs.CheckRun).toLowerCase() !== 'false'
 
     const searchResult = await findResults(path)
     if (searchResult.filesToUpload.length === 0) {
@@ -46,28 +47,29 @@ async function run(): Promise<void> {
         a => a.annotation_level,
         annotations
       )
-      const numFailures = (
-        annotationsByLevel[AnnotationLevel.failure] || []
-      ).length
-      const numWarnings = (
-        annotationsByLevel[AnnotationLevel.warning] || []
-      ).length
-      const numNotices = (
-        annotationsByLevel[AnnotationLevel.notice] || []
-      ).length
+      const numFailures = (annotationsByLevel[AnnotationLevel.failure] || [])
+        .length
+      const numWarnings = (annotationsByLevel[AnnotationLevel.warning] || [])
+        .length
+      const numNotices = (annotationsByLevel[AnnotationLevel.notice] || [])
+        .length
 
       let checkHref = ''
-      for (const annotationSet of groupedAnnotations) {
-        const href = await createCheck(
-          name,
-          title,
-          annotationSet,
-          annotations.length,
-          conclusion
-        )
-        if (!checkHref && href) {
-          checkHref = href
+      if (checkRun) {
+        for (const annotationSet of groupedAnnotations) {
+          const href = await createCheck(
+            name,
+            title,
+            annotationSet,
+            annotations.length,
+            conclusion
+          )
+          if (!checkHref && href) {
+            checkHref = href
+          }
         }
+      } else {
+        core.info('Check run creation is disabled via check_run input')
       }
 
       core.setOutput(Outputs.Conclusion, conclusion)

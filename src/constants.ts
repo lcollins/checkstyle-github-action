@@ -2,7 +2,8 @@ export enum Inputs {
   Name = 'name',
   Title = 'title',
   Path = 'path',
-  Token = 'token'
+  Token = 'token',
+  CheckRun = 'check_run'
 }
 
 export enum Outputs {
