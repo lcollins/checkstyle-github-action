@@ -186,6 +186,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = void 0;
 const core = __importStar(__nccwpck_require__(42186));
 const search_1 = __nccwpck_require__(42506);
 const constants_1 = __nccwpck_require__(55105);
@@ -244,6 +245,7 @@ function run() {
         }
     });
 }
+exports.run = run;
 function getConclusion(annotations) {
     if (annotations.length === 0) {
         return 'success';

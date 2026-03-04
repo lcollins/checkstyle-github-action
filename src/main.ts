@@ -8,7 +8,7 @@ import {context, getOctokit} from '@actions/github'
 
 const MAX_ANNOTATIONS_PER_REQUEST = 50
 
-async function run(): Promise<void> {
+export async function run(): Promise<void> {
   try {
     const path = core.getInput(Inputs.Path, {required: true})
     const name = core.getInput(Inputs.Name)
