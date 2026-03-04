@@ -13,6 +13,8 @@ async function run(): Promise<void> {
     const path = core.getInput(Inputs.Path, {required: true})
     const name = core.getInput(Inputs.Name)
     const title = core.getInput(Inputs.Title)
+    const annotationGenerationInput = core.getInput(Inputs.AnnotationGeneration)
+    const annotationGeneration = annotationGenerationInput !== 'false'
 
     const searchResult = await findResults(path)
     if (searchResult.filesToUpload.length === 0) {
@@ -42,14 +44,18 @@ async function run(): Promise<void> {
 
       const conclusion = getConclusion(annotations)
 
-      for (const annotationSet of groupedAnnotations) {
-        await createCheck(
-          name,
-          title,
-          annotationSet,
-          annotations.length,
-          conclusion
-        )
+      if (annotationGeneration) {
+        for (const annotationSet of groupedAnnotations) {
+          await createCheck(
+            name,
+            title,
+            annotationSet,
+            annotations.length,
+            conclusion
+          )
+        }
+      } else {
+        await createCheck(name, title, [], annotations.length, conclusion)
       }
     }
   } catch (error) {
