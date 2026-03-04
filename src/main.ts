@@ -13,6 +13,7 @@ async function run(): Promise<void> {
     const path = core.getInput(Inputs.Path, {required: true})
     const name = core.getInput(Inputs.Name)
     const title = core.getInput(Inputs.Title)
+    const checkRun = core.getInput(Inputs.CheckRun).toLowerCase() !== 'false'
 
     const searchResult = await findResults(path)
     if (searchResult.filesToUpload.length === 0) {
@@ -42,14 +43,18 @@ async function run(): Promise<void> {
 
       const conclusion = getConclusion(annotations)
 
-      for (const annotationSet of groupedAnnotations) {
-        await createCheck(
-          name,
-          title,
-          annotationSet,
-          annotations.length,
-          conclusion
-        )
+      if (checkRun) {
+        for (const annotationSet of groupedAnnotations) {
+          await createCheck(
+            name,
+            title,
+            annotationSet,
+            annotations.length,
+            conclusion
+          )
+        }
+      } else {
+        core.info('Check run creation is disabled via check_run input')
       }
     }
   } catch (error) {
