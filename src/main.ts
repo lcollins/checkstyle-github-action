@@ -47,15 +47,12 @@ export async function run(): Promise<void> {
         a => a.annotation_level,
         annotations
       )
-      const numFailures = (
-        annotationsByLevel[AnnotationLevel.failure] || []
-      ).length
-      const numWarnings = (
-        annotationsByLevel[AnnotationLevel.warning] || []
-      ).length
-      const numNotices = (
-        annotationsByLevel[AnnotationLevel.notice] || []
-      ).length
+      const numFailures = (annotationsByLevel[AnnotationLevel.failure] || [])
+        .length
+      const numWarnings = (annotationsByLevel[AnnotationLevel.warning] || [])
+        .length
+      const numNotices = (annotationsByLevel[AnnotationLevel.notice] || [])
+        .length
 
       let checkHref = ''
       if (checkRun) {

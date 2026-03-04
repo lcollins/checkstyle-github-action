@@ -44,7 +44,12 @@ jest.mock('../src/search', () => ({
 
 import {run} from '../src/main'
 
-const reportPath = path.resolve(__dirname, '..', 'reports', 'checkstyle-result.xml')
+const reportPath = path.resolve(
+  __dirname,
+  '..',
+  'reports',
+  'checkstyle-result.xml'
+)
 
 function setupInputs(checkRun: string): void {
   mockGetInput.mockImplementation((name: string) => {
