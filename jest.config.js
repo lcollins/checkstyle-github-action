@@ -10,7 +10,7 @@ module.exports = {
   testMatch: ['**/*.test.ts'],
   testRunner: 'jest-circus/runner',
   transform: {
-    '^.+\\.ts$': ['ts-jest', {diagnostics: false}]
+    '^.+\\.ts$': 'ts-jest'
   },
   verbose: true
 }
