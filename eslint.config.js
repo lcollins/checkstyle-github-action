@@ -2,7 +2,6 @@
 'use strict'
 
 const tsParser = require('@typescript-eslint/parser')
-const tsPlugin = require('@typescript-eslint/eslint-plugin')
 const jestPlugin = require('eslint-plugin-jest')
 const githubPlugin = require('eslint-plugin-github').default
 
@@ -20,9 +19,6 @@ module.exports = [
         sourceType: 'module',
         project: './tsconfig.json'
       }
-    },
-    plugins: {
-      '@typescript-eslint': tsPlugin
     },
     rules: {
       'eslint-comments/no-use': 'off',
