@@ -38,7 +38,7 @@ module.exports = [
       '@typescript-eslint/consistent-type-assertions': 'error',
       '@typescript-eslint/explicit-function-return-type': ['error', {allowExpressions: true}],
       '@typescript-eslint/no-array-constructor': 'error',
-      '@typescript-eslint/no-empty-interface': 'error',
+      '@typescript-eslint/no-empty-object-type': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-extraneous-class': 'error',
       '@typescript-eslint/no-for-in-array': 'error',
