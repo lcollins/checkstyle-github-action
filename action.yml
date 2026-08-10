@@ -40,7 +40,7 @@ outputs:
   check_href:
     description: 'URL to the generated check run'
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dist/index.js'
 branding:
   icon: umbrella

@@ -2,7 +2,7 @@
 
 # Credit
 
-Adapted from https://github.com/jwgmeligmeyling/checkstyle-github-action to support Node 20.
+Adapted from https://github.com/jwgmeligmeyling/checkstyle-github-action to support Node 24.
 
 # Checkstyle GitHub Action
 
