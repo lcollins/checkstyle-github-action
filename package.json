@@ -39,7 +39,7 @@
     "unescape": "latest"
   },
   "overrides": {
-    "undici": "^7.30.0"
+    "undici": "^7.30.1"
   },
   "devDependencies": {
     "@types/istanbul-lib-report": "^3.0.3",
